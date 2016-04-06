@@ -4,8 +4,8 @@ import xml.etree.ElementTree as etree
 
 class XMLWrapper:
     @staticmethod
-    def parse_xml(xml_str, parser=None):
-        return etree.fromstring(xml_str, parser)
+    def parse_xml(xml_str, parser=etree.XMLParser(encoding='utf-8')):
+        return etree.fromstring(xml_str, parser=parser)
 
     @staticmethod
     def parse_xml_from_file(xml_path):
