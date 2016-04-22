@@ -1,0 +1,20 @@
+{
+  "common_variable": {
+    "driver_folder_name": "polatis",
+    "driver_handler_name": "PolatisDriverHandler",
+    "connection_type": "tcp",
+    "connection_port": 3082,
+    "device_prompt": "\n;\n"
+  },
+
+  "cli_variable": {
+    "ssh": "SSHSession",
+    "telnet": "TelnetSession",
+    "tcp": "TCPSession"
+  },
+
+  "driver_variable": {
+    "service_mode": "tl1",
+    "port_mode": "logical"
+  }
+}

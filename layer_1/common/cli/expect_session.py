@@ -4,24 +4,37 @@ import re
 import socket
 import time
 
+from layer_1.common.configuration_parser import ConfigurationParser
+
 from collections import OrderedDict
 
-from cloudshell.cli.session import Session
-from cloudshell.cli.helper.normalize_buffer import normalize_buffer
+from layer_1.common.cli.session import Session
+from layer_1.common.cli.helper.normalize_buffer import normalize_buffer
 
 class ExpectSession(Session):
-
-    def __init__(self, handler=None, username=None, password=None, host=None, port=None,
-                 timeout=60, new_line='\r', logger=None, **kwargs):
+    def __init__(self, handler=None, timeout=60, new_line='\r',
+                 logger=None, **kwargs):
         self._handler = handler
         self._logger = logger
-        self._host = host
-        self._port = port
-        self._username = username
-        self._password = password
 
         self._new_line = new_line
         self._timeout = timeout
+
+        self._host = None
+        self._username = None
+        self._password = None
+        self._port = None
+
+    def init(self, host, username, password, port=None):
+        self._host = host
+
+        self._username = username
+        self._password = password
+
+        if port is not None:
+            self._port = port
+        else:
+            self._port = ConfigurationParser.get("common_variable", "connection_port")
 
     def _receive_with_retries(self, timeout, retries_count):
         current_retries = 0

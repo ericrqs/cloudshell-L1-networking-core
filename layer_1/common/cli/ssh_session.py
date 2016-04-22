@@ -2,32 +2,33 @@ __author__ = 'g8y3e'
 
 import paramiko
 
-from cloudshell.cli.expect_session import ExpectSession
+from layer_1.common.cli.expect_session import ExpectSession
 
 class SSHSession(ExpectSession):
+    _DEFAULT_BUFFER = 512
+
     def __init__(self, *args, **kwargs):
         ExpectSession.__init__(self, paramiko.SSHClient(), *args, **kwargs)
         self._handler.load_system_host_keys()
         self._handler.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-        if self._port is None:
-            self._port = 22
-
         self._current_channel = None
 
-        self._buffer_size = 512
+        self._buffer_size = SSHSession._DEFAULT_BUFFER
         if 'buffer_size' in kwargs:
             self._buffer_size = kwargs['buffer_size']
 
     def __del__(self):
         self.disconnect()
 
-    def connect(self, re_string=''):
+    def connect(self, host, username, password, port=None, re_string=''):
         """
             Connect to device through ssh
             :param re_string: regular expration of end of output
             :return: str
         """
+        ExpectSession.init(host, username, password, port)
+
         self._logger.info("Host: {0}, port: {1}, username: {2}, password: {3}, timeout: {4}".
                           format(self._host, self._port, self._username, self._password, self._timeout))
 

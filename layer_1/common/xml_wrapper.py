@@ -4,14 +4,19 @@ import xml.etree.ElementTree as etree
 
 class XMLWrapper:
     @staticmethod
-    def parse_xml(xml_str, parser=etree.XMLParser(encoding='utf-8')):
+    def parse_xml(xml_str, parser=None):
+        if parser is None:
+            parser = etree.XMLParser(encoding='utf-8')
+
         return etree.fromstring(xml_str, parser=parser)
 
     @staticmethod
-    def parse_xml_from_file(xml_path):
-        utf8_parser = etree.XMLParser(encoding='utf-8')
+    def parse_xml_from_file(xml_path, parser=None):
+        if parser is None:
+            parser = etree.XMLParser(encoding='utf-8')
+
         xml_str = open(xml_path).read()
-        return etree.fromstring(xml_str, parser=utf8_parser)
+        return etree.fromstring(xml_str, parser=parser)
 
     @staticmethod
     def get_root_node(node):
@@ -50,6 +55,18 @@ class XMLWrapper:
         return node.get(find_prefix + attribute_name)
 
     @staticmethod
+    def set_node_attr(node, attribute_name, find_prefix='', attr_value=''):
+        node.set(find_prefix + attribute_name, attr_value)
+
+    @staticmethod
+    def set_node_text(node, text_str):
+        node.text = text_str
+
+    @staticmethod
+    def append_child(parent_node, child_node):
+        parent_node.append(child_node)
+
+    @staticmethod
     def get_node_prefix(node, prefix_name):
         prefix = ''
         for attrib_name, value in node.attrib.items():
@@ -66,8 +83,29 @@ class XMLWrapper:
         return prefix
 
     @staticmethod
+    def set_indent(node, level=0):
+        tab_separator = " " * 4
+
+        tab_str = "\n" + level * tab_separator
+        if len(node):
+            if not node.text or not node.text.strip():
+                node.text = tab_str + tab_separator
+            if not node.tail or not node.tail.strip():
+                node.tail = tab_str
+            for child_node in node:
+                XMLWrapper.set_indent(child_node, level+1)
+
+            if not child_node.tail or not child_node.tail.strip():
+                child_node.tail = tab_str
+        else:
+            if level and (not node.tail or not node.tail.strip()):
+                node.tail = tab_str
+
+    @staticmethod
     def get_string_from_xml(node):
         etree.register_namespace("", "http://schemas.qualisystems.com/ResourceManagement/DriverCommandResult.xsd")
+
+        XMLWrapper.set_indent(node)
 
         str_data = etree.tostring(node, 'utf-8')
         return str_data.replace('\n', '\r\n')

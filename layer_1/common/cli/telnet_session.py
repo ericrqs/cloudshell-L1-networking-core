@@ -3,23 +3,21 @@ __author__ = 'g8y3e'
 import telnetlib
 from cloudshell.core.logger.qs_logger import get_qs_logger
 
-from cloudshell.cli.expect_session import ExpectSession
+from layer_1.common.cli.expect_session import ExpectSession
 from collections import OrderedDict
 
 class TelnetSession(ExpectSession):
     def __init__(self, *args, **kwargs):
         ExpectSession.__init__(self, telnetlib.Telnet(), *args, **kwargs)
 
-        if self._port is None:
-            self._port = 23
-
-    def connect(self, re_string=''):
+    def connect(self, host, username, password, port=None, re_string=''):
         """
             Connect to device
 
             :param expected_str: regular expression string
             :return:
         """
+        ExpectSession.init(host, username, password, port)
 
         self._handler.open(self._host, int(self._port), self._timeout)
         if self._handler.get_socket() is None:

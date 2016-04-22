@@ -2,26 +2,30 @@ __author__ = 'g8y3e'
 
 import socket
 
-from cloudshell.cli.expect_session import ExpectSession
+from layer_1.common.cli.expect_session import ExpectSession
 
 class TCPSession(ExpectSession):
+    _DEFAULT_BUFFER = 512
+
     def __init__(self, *args, **kwargs):
         ExpectSession.__init__(self, socket.socket(socket.AF_INET, socket.SOCK_STREAM), *args, **kwargs)
 
-        self._buffer_size = 1024
+        self._buffer_size = TCPSession._DEFAULT_BUFFER
         if 'buffer_size' in kwargs:
             self._buffer_size = kwargs['buffer_size']
 
         if self._port is not None:
             self._port = int(self._port)
 
-    def connect(self, re_string=''):
+    def connect(self, host, username, password, port=None, re_string=''):
         """
             Connect to device
 
             :param expected_str: regular expression string
             :return:
         """
+        ExpectSession.init(self, host, username, password, port)
+
         server_address = (self._host, self._port)
         self._handler.connect(server_address)
 
