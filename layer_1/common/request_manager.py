@@ -24,7 +24,7 @@ class RequestManager:
                                                          'command_response_template.xml')).read()
 
         self._responses_data = open(get_file_path('common/response_template/'
-                                                 'responses_template.xml')).read()
+                                                  'responses_template.xml')).read()
 
     def set_request_handler(self, request_handler):
         self._request_handler = request_handler
@@ -65,6 +65,7 @@ class RequestManager:
 
                 try:
                     request_node = XMLWrapper.parse_xml(current_output)
+                    current_output = ''
                 except Exception as error_object:
                     responses_node = self._set_response_error(responses_node, '0',
                                                               'Failed to parse the xml')
@@ -82,24 +83,28 @@ class RequestManager:
                     command_id = XMLWrapper.get_node_attr(command_node, 'CommandId')
 
                     if command_name is not None:
-                        command_name = command_name.lower()
-                        if command_name in self._commands_dict:
-                            callback_tuple = self._commands_dict[command_name]
+                        command_name_lower = command_name.lower()
+                        if command_name_lower in self._commands_dict:
+                            callback_tuple = self._commands_dict[command_name_lower]
 
                             command_response_node = XMLWrapper.parse_xml(self._command_response_data)
 
-                            XMLWrapper.set_node_attr(command_response_node, 'CommandName', attr_value='Login')
+                            XMLWrapper.set_node_attr(command_response_node, 'CommandName', attr_value=command_name)
                             XMLWrapper.set_node_attr(command_response_node, 'CommandId', attr_value=command_id)
 
                             return_state = True
                             try:
-                                callback_tuple[0](callback_tuple[1], request_node)
+                                responce_info = callback_tuple[0](callback_tuple[1], command_node, xs_prefix)
                             except Exception as error_object:
                                 return_state = False
                                 self._set_response_error(responses_node, '0', '')
 
                             XMLWrapper.set_node_attr(command_response_node, 'Success',
                                                      attr_value=str(return_state).lower())
+
+                            if responce_info is not None:
+                                responses_info_node = XMLWrapper.get_child_node(command_response_node, "ResponseInfo")
+                                XMLWrapper.append_child(responses_info_node, responce_info)
 
                             XMLWrapper.append_child(responses_node, command_response_node)
                         else:

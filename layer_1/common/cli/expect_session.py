@@ -25,6 +25,12 @@ class ExpectSession(Session):
         self._password = None
         self._port = None
 
+    def get_username(self):
+        return self._username
+
+    def get_password(self):
+        return self._password
+
     def init(self, host, username, password, port=None):
         self._host = host
 
@@ -74,7 +80,8 @@ class ExpectSession(Session):
             self.send_line(data_str)
 
         if re_string is None or len(re_string) == 0:
-            raise Exception('ExpectSession', 'Expect list is empty!')
+            # log
+            return ""
 
         output_str = self._receive_with_retries(timeout, retries_count)
         if output_str is None:

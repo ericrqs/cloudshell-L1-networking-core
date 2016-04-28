@@ -31,7 +31,7 @@ class TCPSession(ExpectSession):
 
         self._handler.settimeout(self._timeout)
         output = self.hardware_expect(re_string=re_string)
-        self._logger.info(output)
+        #self._logger.info(output)
 
         return output
 

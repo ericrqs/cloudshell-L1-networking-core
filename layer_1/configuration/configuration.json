@@ -4,7 +4,7 @@
     "driver_handler_name": "PolatisDriverHandler",
     "connection_type": "tcp",
     "connection_port": 3082,
-    "device_prompt": "\n;\n"
+    "device_prompt": "\r\n;\r\n"
   },
 
   "cli_variable": {
@@ -15,6 +15,19 @@
 
   "driver_variable": {
     "service_mode": "tl1",
-    "port_mode": "logical"
+    "port_mode": "logical",
+
+    "resource_name": [
+      "Chassis {0}",
+      "Port {0}"
+    ],
+    "resource_family_name": [
+      "L1 Connectivity Switch",
+      "L1 Switch Port"
+    ],
+    "resource_model_name": [
+      "{0}",
+      "Port {0}"
+    ]
   }
 }

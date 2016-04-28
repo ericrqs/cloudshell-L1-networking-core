@@ -56,7 +56,7 @@ class XMLWrapper:
 
     @staticmethod
     def set_node_attr(node, attribute_name, find_prefix='', attr_value=''):
-        node.set(find_prefix + attribute_name, attr_value)
+        node.set(find_prefix + attribute_name, str(attr_value))
 
     @staticmethod
     def set_node_text(node, text_str):

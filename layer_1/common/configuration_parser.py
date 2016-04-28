@@ -23,7 +23,8 @@ class ConfigurationParser:
 
         result_data = ConfigurationParser._CONFIG_JSON
         for key in args:
-            if key in result_data:
+            if (isinstance(result_data, list) and key < len(result_data)) or \
+                    (isinstance(result_data, dict) and key in result_data):
                 result_data = result_data[key]
             else:
                 return None

@@ -21,6 +21,7 @@ if __name__ == '__main__':
 
     request_manager = RequestManager()
     request_manager.bind_command('login', (RequestHandler.login, request_handler))
+    request_manager.bind_command('getresourcedescription', (RequestHandler.get_resource_description, request_handler))
 
     server_connection = ServerConnection(host, port, request_manager)
 

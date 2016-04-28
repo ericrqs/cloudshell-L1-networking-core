@@ -10,8 +10,12 @@ class DriverHandlerBase:
         connection_type = ConfigurationParser.get("common_variable", "connection_type")
 
         self._session = SessionFactory.create(connection_type)
-        self._prompt = ConfigurationParser.get("device_prompt")
+        self._prompt = ConfigurationParser.get("common_variable", "device_prompt")
 
     @abstractmethod
     def login(self, address, username, password):
+        pass
+
+    @abstractmethod
+    def get_resource_description(self, address):
         pass
