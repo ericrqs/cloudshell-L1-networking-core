@@ -19,7 +19,7 @@ class PolatisDriverHandler(DriverHandlerBase):
 
         self._service_mode = ConfigurationParser.get("driver_variable", "service_mode")
 
-    def _incrCTAG(self):
+    def _incr_ctag(self):
         self._ctag += 1
         return self._ctag
 
@@ -32,7 +32,7 @@ class PolatisDriverHandler(DriverHandlerBase):
             command = 'ACT-USER::{0}:1::{1};'.format(username, password)
             command_result = self._session.hardware_expect(command, re_string=self._prompt)
 
-            command = 'RTRV-HDR:::{0}:;'.format(self._incrCTAG())
+            command = 'RTRV-HDR:::{0}:;'.format(self._incr_ctag())
             command_result = self._session.hardware_expect(command, re_string=self._prompt)
 
             match_result = re.search(r" ([A-Za-z0-9]+) ", command_result)
@@ -48,10 +48,10 @@ class PolatisDriverHandler(DriverHandlerBase):
         if self._service_mode.lower() == "scpi":
             pass
         elif self._service_mode.lower() == "tl1":
-            command = "RTRV-NETYPE:{0}::{1}:;".format(self._switch_name, self._incrCTAG())
+            command = "RTRV-NETYPE:{0}::{1}:;".format(self._switch_name, self._incr_ctag())
             device_data["RTRV-NETYPE"] = self._session.hardware_expect(command, re_string=self._prompt)
 
-            command = "RTRV-EQPT:{0}:SYSTEM:{1}:::PARAMETER=SIZE;".format(self._switch_name, self._incrCTAG())
+            command = "RTRV-EQPT:{0}:SYSTEM:{1}:::PARAMETER=SIZE;".format(self._switch_name, self._incr_ctag())
             device_data["RTRV-EQPT-SIZE"] = self._session.hardware_expect(command, re_string=self._prompt)
 
             size_match = re.search(r"SYSTEM:SIZE=(?P<src>\d+)x(?P<dst>\d+)", device_data["RTRV-EQPT-SIZE"])
@@ -65,13 +65,13 @@ class PolatisDriverHandler(DriverHandlerBase):
                 raise Exception("PolatisDriverHandler", "Can't find 'size' parameter!")
 
             command = "RTRV-PORT-SHUTTER:{0}:{1}&&{2}:{3}:;".format(self._switch_name, 1, switch_size,
-                                                                    self._incrCTAG())
+                                                                    self._incr_ctag())
             device_data["RTRV-PORT-SHUTTER"] = self._session.hardware_expect(command, re_string=self._prompt)
 
-            command = "RTRV-PATCH:{0}::{1}:;".format(self._switch_name, self._incrCTAG())
+            command = "RTRV-PATCH:{0}::{1}:;".format(self._switch_name, self._incr_ctag())
             device_data["RTRV-PATCH"] = self._session.hardware_expect(command, re_string=self._prompt)
 
-            command = "RTRV-INV:{0}:OCS:{1}:;".format(self._switch_name, self._incrCTAG())
+            command = "RTRV-INV:{0}:OCS:{1}:;".format(self._switch_name, self._incr_ctag())
             device_data["RTRV-INV-SN"] = self._session.hardware_expect(command, re_string=self._prompt)
         else:
             raise Exception("PolatisDriverHandler", "From service mode type (current mode: '" +
@@ -120,14 +120,7 @@ class PolatisDriverHandler(DriverHandlerBase):
 
             # get port mappings
             address_prefix = address + "/1/"
-            """
-            foreach data [split $::g_commandTable(RTRV-PATCH) "\n"] {
-            if {[regexp {(\d+),(\d+)} $data . srcPort dstPort]} {
-                set ::g_mapTable($srcPort) $dstPort
-            set ::g_mapTable($dstPort) $srcPort
-            }
-            }
-            """
+
             port_map_list = device_data["RTRV-PATCH"].split("\n")
 
             for port_data in port_map_list:
@@ -172,3 +165,29 @@ class PolatisDriverHandler(DriverHandlerBase):
                             self._service_mode + "'!")
 
         return self._resource_info.convert_to_xml()
+
+    def map_bidi(self, src_port, dst_port):
+        if self._service_mode.lower() == "scpi":
+            pass
+        elif self._service_mode.lower() == "tl1":
+
+            min_port = min(int(src_port[1]), int(dst_port[1]))
+            max_port = max(int(src_port[1]), int(dst_port[1]))
+
+            command = "ENT-PATCH:%s:%s,%s:%s:;".format(self._switch_name, min_port, max_port,
+                                                       self._incr_ctag())
+
+            self._session.hardware_expect(command, re_string=self._prompt)
+
+    def map_clear_to(self, src_port, dst_port):
+        if self._service_mode.lower() == "scpi":
+            pass
+        elif self._service_mode.lower() == "tl1":
+
+            min_port = min(int(src_port[1]), int(dst_port[1]))
+            max_port = max(int(src_port[1]), int(dst_port[1]))
+
+            command = "DLT-PATCH:%s:%s:%s:;".format(self._switch_name, min_port, max_port,
+                                                       self._incr_ctag())
+
+            self._session.hardware_expect(command, re_string=self._prompt)

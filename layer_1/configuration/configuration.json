@@ -1,16 +1,17 @@
 {
   "common_variable": {
-    "driver_folder_name": "polatis",
-    "driver_handler_name": "PolatisDriverHandler",
+    "driver_name": "Polatis",
+    "driver_module": ["layer_1.polatis.polatis_driver_handler", "PolatisDriverHandler"],
     "connection_type": "tcp",
     "connection_port": 3082,
-    "device_prompt": "\r\n;\r\n"
+    "device_prompt": "\r\n;\r\n",
+    "server_timeout": 60
   },
 
   "cli_variable": {
-    "ssh": "SSHSession",
-    "telnet": "TelnetSession",
-    "tcp": "TCPSession"
+    "ssh": ["layer_1.common.cli.ssh_session", "SSHSession"],
+    "telnet": ["layer_1.common.cli.telnet_session", "TelnetSession"],
+    "tcp": ["layer_1.common.cli.tcp_session", "TCPSession"]
   },
 
   "driver_variable": {

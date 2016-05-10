@@ -19,3 +19,11 @@ class DriverHandlerBase:
     @abstractmethod
     def get_resource_description(self, address):
         pass
+
+    @abstractmethod
+    def map_bidi(self, src_port, dst_port):
+        pass
+
+    @abstractmethod
+    def map_clear_to(self, src_port, dst_port):
+        pass

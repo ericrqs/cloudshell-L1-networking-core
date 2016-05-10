@@ -5,6 +5,7 @@ import re
 
 from xml_wrapper import XMLWrapper
 from helper.system_helper import get_file_path
+from configuration_parser import ConfigurationParser
 
 class RequestManager:
     def __init__(self, buffer_size=1024):
@@ -12,6 +13,7 @@ class RequestManager:
         self._connection_socket = None
         self._request_handler = None
 
+        self._server_socket_timeout = ConfigurationParser.get("common_variable", "server_timeout")
         self._commands_dict = dict()
 
         self._re_command_end = r'</Commands>'
@@ -46,9 +48,9 @@ class RequestManager:
 
         return responses_node
 
-    def parse_request(self, connection_socket):
+    def parse_request(self, connection_socket, logger):
         self._connection_socket = connection_socket
-        self._connection_socket.settimeout(60)
+        self._connection_socket.settimeout(self._server_socket_timeout)
 
         current_output = ''
         while True:
@@ -61,7 +63,8 @@ class RequestManager:
 
             match_result = re.search(self._re_command_end, current_output)
             if match_result:
-                responses_node = XMLWrapper.parse_xml( self._responses_data)
+                responses_node = XMLWrapper.parse_xml(self._responses_data)
+                logger.info(current_output.replace('\r', '') + "\n\n")
 
                 try:
                     request_node = XMLWrapper.parse_xml(current_output)
@@ -70,8 +73,10 @@ class RequestManager:
                     responses_node = self._set_response_error(responses_node, '0',
                                                               'Failed to parse the xml')
 
-                    self._connection_socket.send(XMLWrapper.get_string_from_xml(responses_node) +
-                                                 self._end_command)
+                    responses_str = XMLWrapper.get_string_from_xml(responses_node)
+                    logger.info(responses_str.replace('\r', '') + "\n\n")
+                    self._connection_socket.send(responses_str + self._end_command)
+
                     current_output = ''
                     continue
 
@@ -93,6 +98,7 @@ class RequestManager:
                             XMLWrapper.set_node_attr(command_response_node, 'CommandId', attr_value=command_id)
 
                             return_state = True
+                            responce_info = None
                             try:
                                 responce_info = callback_tuple[0](callback_tuple[1], command_node, xs_prefix)
                             except Exception as error_object:
@@ -106,9 +112,16 @@ class RequestManager:
                                 responses_info_node = XMLWrapper.get_child_node(command_response_node, "ResponseInfo")
                                 XMLWrapper.append_child(responses_info_node, responce_info)
 
+                                if command_name_lower == 'getstateid':
+                                    attr_prefix = 'http://www.w3.org/2001/XMLSchema-instance'
+                                    XMLWrapper.set_node_attr(responses_info_node, 'xmlns:xsi', attr_value=attr_prefix)
+                                    XMLWrapper.set_node_attr(responses_info_node, 'type',
+                                                             '{' + attr_prefix + '}', attr_value ='StateInfo')
+
                             XMLWrapper.append_child(responses_node, command_response_node)
                         else:
                             responses_node = self._set_response_error(responses_node, '404',
                                                                       'Command not found!')
-
-                self._connection_socket.send(XMLWrapper.get_string_from_xml(responses_node) + self._end_command)
+                responce_str = XMLWrapper.get_string_from_xml(responses_node)
+                logger.info(responce_str.replace('\r', '') + "\n")
+                self._connection_socket.send(responce_str + self._end_command)
