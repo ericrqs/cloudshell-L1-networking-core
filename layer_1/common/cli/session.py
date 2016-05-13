@@ -7,7 +7,11 @@ class Session:
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def connect(self, re_string=''):
+    def connect(self, host, username, password, port=None, re_string=''):
+        pass
+
+    @abstractmethod
+    def reconnect(self, re_string=''):
         pass
 
     @abstractmethod

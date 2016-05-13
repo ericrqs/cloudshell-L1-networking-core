@@ -27,6 +27,7 @@ if __name__ == '__main__':
     request_manager.bind_command('getstateid', (RequestHandler.get_state_id, request_handler))
     request_manager.bind_command('mapbidi', (RequestHandler.map_bidi, request_handler))
     request_manager.bind_command('mapclearto', (RequestHandler.map_clear_to, request_handler))
+    request_manager.bind_command('mapclear', (RequestHandler.map_clear, request_handler))
 
     exe_folder_str = sys.argv[0]
     index = exe_folder_str.rfind('\\')

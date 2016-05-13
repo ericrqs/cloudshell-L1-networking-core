@@ -12,7 +12,7 @@ from layer_1.common.cli.session import Session
 from layer_1.common.cli.helper.normalize_buffer import normalize_buffer
 
 class ExpectSession(Session):
-    def __init__(self, handler=None, timeout=60, new_line='\r',
+    def __init__(self, handler=None, timeout=60, new_line='\r', reconnect_count=3,
                  logger=None, **kwargs):
         self._handler = handler
         self._logger = logger
@@ -24,6 +24,8 @@ class ExpectSession(Session):
         self._username = None
         self._password = None
         self._port = None
+
+        self._reconnect_count = reconnect_count
 
     def get_username(self):
         return self._username
@@ -62,6 +64,22 @@ class ExpectSession(Session):
 
     def send_line(self, data_str):
         self._send(data_str + self._new_line)
+
+    def send_command(self, data_str=None, re_string='', expect_map=OrderedDict(),
+                     error_map=OrderedDict(), timeout=None, retries_count=3):
+        reconnect_count = 0
+        while reconnect_count < self._reconnect_count:
+            try:
+                output_str = self.hardware_expect(timeout, data_str, re_string, expect_map, error_map, timeout,
+                                                  retries_count)
+
+                return output_str
+            except Exception as error_object:
+                    self.reconnect(re_string)
+
+            reconnect_count += 1
+
+        raise Exception('ExpectSession', 'Can\'t connect to device!')
 
     def hardware_expect(self, data_str=None, re_string='', expect_map=OrderedDict(),
                         error_map=OrderedDict(), timeout=None, retries_count=3):
@@ -104,6 +122,7 @@ class ExpectSession(Session):
                     output_str = ''
 
             current_output = self._receive_with_retries(timeout, retries_count)
+
             if current_output is None:
                 output_str = ''.join(output_list) + output_str
                 self._logger.error("Can't find prompt in output: \n" + output_str)

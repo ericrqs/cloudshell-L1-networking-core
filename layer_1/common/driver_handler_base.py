@@ -8,8 +8,9 @@ from cli.session_factory import SessionFactory
 class DriverHandlerBase:
     def __init__(self):
         connection_type = ConfigurationParser.get("common_variable", "connection_type")
+        connection_timeout = ConfigurationParser.get("common_variable", "server_timeout")
 
-        self._session = SessionFactory.create(connection_type)
+        self._session = SessionFactory.create(connection_type, timeout=connection_timeout)
         self._prompt = ConfigurationParser.get("common_variable", "device_prompt")
 
     @abstractmethod
@@ -26,4 +27,8 @@ class DriverHandlerBase:
 
     @abstractmethod
     def map_clear_to(self, src_port, dst_port):
+        pass
+
+    @abstractmethod
+    def map_clear(self, src_port, dst_port):
         pass

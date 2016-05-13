@@ -23,7 +23,7 @@ class PolatisDriverHandler(DriverHandlerBase):
         self._ctag += 1
         return self._ctag
 
-    def login(self, address, username, password):
+    def login(self, address, username, password, command_logger=None):
         self._session.connect(address, username, password, port=None)
 
         if self._service_mode.lower() == "scpi":
@@ -31,9 +31,11 @@ class PolatisDriverHandler(DriverHandlerBase):
         elif self._service_mode.lower() == "tl1":
             command = 'ACT-USER::{0}:1::{1};'.format(username, password)
             command_result = self._session.hardware_expect(command, re_string=self._prompt)
+            command_logger.info(command_result)
 
             command = 'RTRV-HDR:::{0}:;'.format(self._incr_ctag())
             command_result = self._session.hardware_expect(command, re_string=self._prompt)
+            command_logger.info(command_result)
 
             match_result = re.search(r" ([A-Za-z0-9]+) ", command_result)
             if match_result is not None:
@@ -79,7 +81,7 @@ class PolatisDriverHandler(DriverHandlerBase):
 
         return device_data
 
-    def get_resource_description(self, address):
+    def get_resource_description(self, address, command_logger=None):
         device_data = self._get_device_data()
 
         self._resource_info = ResourceInfo()
@@ -119,7 +121,7 @@ class PolatisDriverHandler(DriverHandlerBase):
                 raise Exception("PolatisDriverHandler", "Can't parse serial number info!")
 
             # get port mappings
-            address_prefix = address + "/1/"
+            address_prefix = address + "/"
 
             port_map_list = device_data["RTRV-PATCH"].split("\n")
 
@@ -132,6 +134,7 @@ class PolatisDriverHandler(DriverHandlerBase):
                     src_port = port_map_dict["src_port"]
                     dst_port = port_map_dict["dst_port"]
                     self._mapping_info[src_port] = dst_port
+                    self._mapping_info[dst_port] = src_port
 
             # add port info
             port_list = device_data["RTRV-PORT-SHUTTER"].split("\n")
@@ -166,7 +169,7 @@ class PolatisDriverHandler(DriverHandlerBase):
 
         return self._resource_info.convert_to_xml()
 
-    def map_bidi(self, src_port, dst_port):
+    def map_bidi(self, src_port, dst_port, command_logger=None):
         if self._service_mode.lower() == "scpi":
             pass
         elif self._service_mode.lower() == "tl1":
@@ -174,12 +177,26 @@ class PolatisDriverHandler(DriverHandlerBase):
             min_port = min(int(src_port[1]), int(dst_port[1]))
             max_port = max(int(src_port[1]), int(dst_port[1]))
 
-            command = "ENT-PATCH:%s:%s,%s:%s:;".format(self._switch_name, min_port, max_port,
+            command = "ENT-PATCH:{0}:{1},{2}:{3}:;".format(self._switch_name, min_port, max_port,
+                                                       self._incr_ctag())
+
+            command_result = self._session.hardware_expect(command, re_string=self._prompt)
+            command_logger.info(command_result)
+
+    def map_clear_to(self, src_port, dst_port, command_logger=None):
+        if self._service_mode.lower() == "scpi":
+            pass
+        elif self._service_mode.lower() == "tl1":
+
+            min_port = min(int(src_port[1]), int(dst_port[1]))
+            max_port = max(int(src_port[1]), int(dst_port[1]))
+
+            command = "DLT-PATCH:{0}:{1}:{2}:;".format(self._switch_name, min_port, max_port,
                                                        self._incr_ctag())
 
             self._session.hardware_expect(command, re_string=self._prompt)
 
-    def map_clear_to(self, src_port, dst_port):
+    def map_clear(self, src_port, dst_port, command_logger=None):
         if self._service_mode.lower() == "scpi":
             pass
         elif self._service_mode.lower() == "tl1":
@@ -187,7 +204,7 @@ class PolatisDriverHandler(DriverHandlerBase):
             min_port = min(int(src_port[1]), int(dst_port[1]))
             max_port = max(int(src_port[1]), int(dst_port[1]))
 
-            command = "DLT-PATCH:%s:%s:%s:;".format(self._switch_name, min_port, max_port,
+            command = "DLT-PATCH:{0}:{1}:{2}:;".format(self._switch_name, min_port, max_port,
                                                        self._incr_ctag())
 
             self._session.hardware_expect(command, re_string=self._prompt)

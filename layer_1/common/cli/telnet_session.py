@@ -1,7 +1,6 @@
 __author__ = 'g8y3e'
 
 import telnetlib
-from cloudshell.core.logger.qs_logger import get_qs_logger
 
 from layer_1.common.cli.expect_session import ExpectSession
 from collections import OrderedDict

@@ -48,7 +48,7 @@ class RequestManager:
 
         return responses_node
 
-    def parse_request(self, connection_socket, logger):
+    def parse_request(self, connection_socket, xml_logger, command_logger):
         self._connection_socket = connection_socket
         self._connection_socket.settimeout(self._server_socket_timeout)
 
@@ -64,7 +64,7 @@ class RequestManager:
             match_result = re.search(self._re_command_end, current_output)
             if match_result:
                 responses_node = XMLWrapper.parse_xml(self._responses_data)
-                logger.info(current_output.replace('\r', '') + "\n\n")
+                xml_logger.info(current_output.replace('\r', '') + "\n\n")
 
                 try:
                     request_node = XMLWrapper.parse_xml(current_output)
@@ -74,7 +74,7 @@ class RequestManager:
                                                               'Failed to parse the xml')
 
                     responses_str = XMLWrapper.get_string_from_xml(responses_node)
-                    logger.info(responses_str.replace('\r', '') + "\n\n")
+                    xml_logger.info(responses_str.replace('\r', '') + "\n\n")
                     self._connection_socket.send(responses_str + self._end_command)
 
                     current_output = ''
@@ -100,10 +100,12 @@ class RequestManager:
                             return_state = True
                             responce_info = None
                             try:
-                                responce_info = callback_tuple[0](callback_tuple[1], command_node, xs_prefix)
+                                responce_info = callback_tuple[0](callback_tuple[1], command_node, xs_prefix,
+                                                                  command_logger)
                             except Exception as error_object:
                                 return_state = False
-                                self._set_response_error(responses_node, '0', '')
+                                command_logger.error(str(error_object))
+                                self._set_response_error(responses_node, '0', str(error_object))
 
                             XMLWrapper.set_node_attr(command_response_node, 'Success',
                                                      attr_value=str(return_state).lower())
@@ -112,9 +114,10 @@ class RequestManager:
                                 responses_info_node = XMLWrapper.get_child_node(command_response_node, "ResponseInfo")
                                 XMLWrapper.append_child(responses_info_node, responce_info)
 
+                                # exception for method GetStateID
                                 if command_name_lower == 'getstateid':
                                     attr_prefix = 'http://www.w3.org/2001/XMLSchema-instance'
-                                    XMLWrapper.set_node_attr(responses_info_node, 'xmlns:xsi', attr_value=attr_prefix)
+                                    #XMLWrapper.set_node_attr(responses_info_node, 'xmlns:xsi', attr_value=attr_prefix)
                                     XMLWrapper.set_node_attr(responses_info_node, 'type',
                                                              '{' + attr_prefix + '}', attr_value ='StateInfo')
 
@@ -123,5 +126,5 @@ class RequestManager:
                             responses_node = self._set_response_error(responses_node, '404',
                                                                       'Command not found!')
                 responce_str = XMLWrapper.get_string_from_xml(responses_node)
-                logger.info(responce_str.replace('\r', '') + "\n")
+                xml_logger.info(responce_str.replace('\r', '') + "\n")
                 self._connection_socket.send(responce_str + self._end_command)

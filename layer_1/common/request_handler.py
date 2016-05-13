@@ -14,6 +14,10 @@ class RequestHandler:
         self._driver_handler = None
         self._state_id = '-1'
 
+        self._device_address = None
+        self._device_user = None
+        self._device_password = None
+
         self._state_id_template = open(get_file_path('common/response_template/'
                                                      'state_id_template.xml')).read()
         self.init_driver_handler()
@@ -30,7 +34,7 @@ class RequestHandler:
 
         raise Exception('RequestHandler', 'Can\'t found class in package!')
 
-    def login(self, command_node, xs_prefix=''):
+    def login(self, command_node, xs_prefix='', command_logger=None):
         """
         <Commands xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.qualisystems.com/ResourceManagement/DriverCommands.xsd">
             <Command CommandName="Login" CommandId="567f4dc1-e2e5-4980-b726-a5d906c8679b">
@@ -45,6 +49,7 @@ class RequestHandler:
         :param xml_node:
         :return:
         """
+        command_logger.info("Begin")
         parameters_node = XMLWrapper.get_child_node(command_node, 'Parameters', xs_prefix)
         address_node = XMLWrapper.get_child_node(parameters_node, 'Address', xs_prefix)
         user_node = XMLWrapper.get_child_node(parameters_node, 'User', xs_prefix)
@@ -54,9 +59,20 @@ class RequestHandler:
         user_str = XMLWrapper.get_node_text(user_node)
         password_str = XMLWrapper.get_node_text(password_node)
 
-        return self._driver_handler.login(address_str, user_str, password_str)
+        response_node = None
+        if self._device_address != address_str or self._device_user != user_str or \
+            self._device_password != password_str:
+            response_node = self._driver_handler.login(address_str, user_str, password_str, command_logger)
 
-    def get_resource_description(self, command_node, xs_prefix=''):
+        self._device_address = address_str
+        self._device_user = user_str
+        self._device_password = password_str
+
+        command_logger.info("end")
+
+        return response_node
+
+    def get_resource_description(self, command_node, xs_prefix='', command_logger=None):
         """
         <Commands xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.qualisystems.com/ResourceManagement/DriverCommands.xsd">
             <Command CommandName="GetResourceDescription" CommandId="0d7000f2-dc20-401a-bdc6-09a2e1cb1f02">
@@ -74,9 +90,9 @@ class RequestHandler:
         address_node = XMLWrapper.get_child_node(parameters_node, 'Address', xs_prefix)
         address_str = XMLWrapper.get_node_text(address_node)
 
-        return self._driver_handler.get_resource_description(address_str)
+        return self._driver_handler.get_resource_description(address_str, command_logger)
 
-    def set_state_id(self, command_node, xs_prefix=''):
+    def set_state_id(self, command_node, xs_prefix='', command_logger=None):
         """
         <Commands xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.qualisystems.com/ResourceManagement/DriverCommands.xsd">
             <Command CommandName="SetStateId" CommandId="29d2dd21-0a18-4c94-a43c-0f0e8f355151">
@@ -97,7 +113,7 @@ class RequestHandler:
 
         return None
 
-    def get_state_id(self, command_node, xs_prefix=''):
+    def get_state_id(self, command_node, xs_prefix='', command_logger=None):
         """
         <Commands xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.qualisystems.com/ResourceManagement/DriverCommands.xsd">
             <Command CommandName="GetStateId" CommandId="9d75a6b5-3d1d-4e65-b3ba-42d7344adaef">
@@ -110,11 +126,11 @@ class RequestHandler:
         :return:
         """
         state_id_node = XMLWrapper.parse_xml(self._state_id_template)
-        XMLWrapper.set_node_text(state_id_node, self._state_id)
+        XMLWrapper.set_node_text(state_id_node, '-1')
 
         return state_id_node
 
-    def map_bidi(self, command_node, xs_prefix=''):
+    def map_bidi(self, command_node, xs_prefix='', command_logger=None):
         """
         <Commands xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.qualisystems.com/ResourceManagement/DriverCommands.xsd">
             <Command CommandName="MapBidi" CommandId="c2a37eca-472f-4492-810e-cdc237a7c33a">
@@ -139,9 +155,9 @@ class RequestHandler:
         src_port_str = XMLWrapper.get_node_text(src_port_node)
         dst_port_str = XMLWrapper.get_node_text(dst_port_node)
 
-        return self._driver_handler.map_bidi(src_port_str.split('/'), dst_port_str.split('/'))
+        return self._driver_handler.map_bidi(src_port_str.split('/'), dst_port_str.split('/'), command_logger)
 
-    def map_clear_to(self, command_node, xs_prefix=''):
+    def map_clear_to(self, command_node, xs_prefix='', command_logger=None):
         """
         <Commands xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.qualisystems.com/ResourceManagement/DriverCommands.xsd">
             <Command CommandName="MapClearTo" CommandId="09cc9080-386b-4143-aaa0-a7211370304b">
@@ -165,5 +181,30 @@ class RequestHandler:
         src_port_str = XMLWrapper.get_node_text(src_port_node)
         dst_port_str = XMLWrapper.get_node_text(dst_port_node)
 
-        return self._driver_handler.map_clear_to(src_port_str.split('/'), dst_port_str.split('/'))
+        return self._driver_handler.map_clear_to(src_port_str.split('/'), dst_port_str.split('/'), command_logger)
+
+    def map_clear(self, command_node, xs_prefix='', command_logger=None):
+        """
+        <Commands xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.qualisystems.com/ResourceManagement/DriverCommands.xsd">
+            <Command CommandName="MapClear" CommandId="4fa3d6d9-e5b2-446a-9c39-6bfb12842d6c">
+                <Parameters xsi:type="MapClearParameters">
+                  <MapPort>192.168.28.223/88</MapPort>
+                  <MapPort>192.168.28.223/13</MapPort>
+                </Parameters>
+            </Command>
+        </Commands>
+
+       :param command_node:
+       :param xs_prefix:
+       :return:
+       """
+
+        parameters_node = XMLWrapper.get_child_node(command_node, 'Parameters', xs_prefix)
+
+        map_ports = XMLWrapper.get_all_child_node(parameters_node, 'MapPort', xs_prefix)
+
+        src_port_str = XMLWrapper.get_node_text(map_ports[0])
+        dst_port_str = XMLWrapper.get_node_text(map_ports[1])
+
+        return self._driver_handler.map_clear(src_port_str.split('/'), dst_port_str.split('/'), command_logger)
 

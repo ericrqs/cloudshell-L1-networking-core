@@ -7,8 +7,11 @@ from layer_1.common.cli.expect_session import ExpectSession
 class TCPSession(ExpectSession):
     _DEFAULT_BUFFER = 512
 
+    def _init_handler(self):
+        return socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
     def __init__(self, *args, **kwargs):
-        ExpectSession.__init__(self, socket.socket(socket.AF_INET, socket.SOCK_STREAM), *args, **kwargs)
+        ExpectSession.__init__(self, self._init_handler(), *args, **kwargs)
 
         self._buffer_size = TCPSession._DEFAULT_BUFFER
         if 'buffer_size' in kwargs:
@@ -27,11 +30,23 @@ class TCPSession(ExpectSession):
         ExpectSession.init(self, host, username, password, port)
 
         server_address = (self._host, self._port)
+
+        self._handler = self._init_handler()
         self._handler.connect(server_address)
 
         self._handler.settimeout(self._timeout)
         output = self.hardware_expect(re_string=re_string)
-        #self._logger.info(output)
+
+        return output
+
+    def reconnect(self, re_string=''):
+        server_address = (self._host, self._port)
+
+        self._handler = self._init_handler()
+        self._handler.connect(server_address)
+
+        self._handler.settimeout(self._timeout)
+        output = self.hardware_expect(re_string=re_string)
 
         return output
 

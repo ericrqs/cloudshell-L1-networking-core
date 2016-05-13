@@ -32,15 +32,18 @@ _LOGGER_LOCK = threading.Lock()
 
 
 
-def get_settings():
+def get_settings(format=None):
     config = {}
     # Level
     log_level = QSConfigParser.get_setting(LOG_SECTION, 'LOG_LEVEL') or DEFAULT_LEVEL
     config['LOG_LEVEL'] = log_level
 
     # Log format
-    log_format = QSConfigParser.get_setting(LOG_SECTION, 'LOG_FORMAT') or DEFAULT_FORMAT
-    config['FORMAT'] = log_format
+    if format is None:
+        log_format = QSConfigParser.get_setting(LOG_SECTION, 'LOG_FORMAT') or DEFAULT_FORMAT
+        config['FORMAT'] = log_format
+    else:
+        config['FORMAT'] = format
 
     # log_path
     log_path = QSConfigParser.get_setting(LOG_SECTION, 'LOG_PATH')
@@ -100,7 +103,7 @@ def log_execution_info(logger_hdlr, exec_info):
         logger_hdlr.info('-----------------------------------------------------------\n')
 
 
-def get_qs_logger(log_group='Ungrouped', log_category='QS', log_file_prefix='QS', log_folder=None):
+def get_qs_logger(log_group='Ungrouped', log_category='QS', log_file_prefix='QS', log_folder=None, format=None):
 
     """
     :param log_group: This folder will be grouped under this name. The default implementation of the group is a folder
@@ -119,18 +122,18 @@ def get_qs_logger(log_group='Ungrouped', log_category='QS', log_file_prefix='QS'
     """
     _LOGGER_LOCK.acquire()
     try:
-        if log_group in _LOGGER_CONTAINER:
-            logger = _LOGGER_CONTAINER[log_group]
-        else:
-            logger = _create_logger(log_group, log_category, log_file_prefix, log_folder)
-            _LOGGER_CONTAINER[log_group] = logger
+        #if log_group in _LOGGER_CONTAINER:
+        #    logger = _LOGGER_CONTAINER[log_group]
+        #else:
+        logger = _create_logger(log_group, log_category, log_file_prefix, log_folder, format=format)
+        _LOGGER_CONTAINER[log_group] = logger
     finally:
         _LOGGER_LOCK.release()
 
     return logger
 
 
-def _create_logger(log_group, log_category, log_file_prefix, log_folder):
+def _create_logger(log_group, log_category, log_file_prefix, log_folder, format=None):
     """
     :param log_group: This folder will be grouped under this name. The default implementation of the group is a folder
     under the logs directory. According to the CloudShell logging standard pass the reservation id as this value when
@@ -149,7 +152,7 @@ def _create_logger(log_group, log_category, log_file_prefix, log_folder):
     log_file_prefix = re.sub(' ', '_', log_file_prefix)
     log_category = '%s.%s' % (log_category, log_file_prefix)
 
-    config = get_settings()
+    config = get_settings(format)
 
     if 'LOG_LEVEL' in os.environ:
         log_level = os.environ['LOG_LEVEL']
