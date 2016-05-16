@@ -5,7 +5,8 @@
     "connection_type": "tcp",
     "connection_port": 3082,
     "device_prompt": "\r\n;\r\n",
-    "server_timeout": 10
+    "server_timeout": 10,
+    "runtime_configuration": "polatis_runtime_configuration.json"
   },
 
   "cli_variable": {
