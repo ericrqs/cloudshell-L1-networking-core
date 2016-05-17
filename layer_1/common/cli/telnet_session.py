@@ -6,8 +6,12 @@ from layer_1.common.cli.expect_session import ExpectSession
 from collections import OrderedDict
 
 class TelnetSession(ExpectSession):
+
+    def _init_handler(self):
+        return telnetlib.Telnet()
+
     def __init__(self, *args, **kwargs):
-        ExpectSession.__init__(self, telnetlib.Telnet(), *args, **kwargs)
+        ExpectSession.__init__(self, self._init_handler(), *args, **kwargs)
 
     def connect(self, host, username, password, port=None, re_string=''):
         """
@@ -30,6 +34,12 @@ class TelnetSession(ExpectSession):
         self._logger.info(output)
 
         return output
+
+    def reconnect(self, re_string=''):
+        self.disconnect()
+
+        self._handler = self._init_handler()
+        return self.connect(self._host, self._username, self._password, self._port, re_string)
 
     def disconnect(self):
         """

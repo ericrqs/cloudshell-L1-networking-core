@@ -40,15 +40,10 @@ class TCPSession(ExpectSession):
         return output
 
     def reconnect(self, re_string=''):
-        server_address = (self._host, self._port)
-
+        self.disconnect()
         self._handler = self._init_handler()
-        self._handler.connect(server_address)
 
-        self._handler.settimeout(self._timeout)
-        output = self.hardware_expect(re_string=re_string)
-
-        return output
+        return self.connect(self._host, self._username, self._password, self._port, re_string)
 
     def disconnect(self):
         """

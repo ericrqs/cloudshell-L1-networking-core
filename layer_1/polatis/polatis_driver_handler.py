@@ -30,11 +30,11 @@ class PolatisDriverHandler(DriverHandlerBase):
             pass
         elif self._service_mode.lower() == "tl1":
             command = 'ACT-USER::{0}:1::{1};'.format(username, password)
-            command_result = self._session.hardware_expect(command, re_string=self._prompt)
+            command_result = self._session.send_command(command, re_string=self._prompt)
             command_logger.info(command_result)
 
             command = 'RTRV-HDR:::{0}:;'.format(self._incr_ctag())
-            command_result = self._session.hardware_expect(command, re_string=self._prompt)
+            command_result = self._session.send_command(command, re_string=self._prompt)
             command_logger.info(command_result)
 
             match_result = re.search(r" ([A-Za-z0-9]+) ", command_result)
@@ -51,10 +51,10 @@ class PolatisDriverHandler(DriverHandlerBase):
             pass
         elif self._service_mode.lower() == "tl1":
             command = "RTRV-NETYPE:{0}::{1}:;".format(self._switch_name, self._incr_ctag())
-            device_data["RTRV-NETYPE"] = self._session.hardware_expect(command, re_string=self._prompt)
+            device_data["RTRV-NETYPE"] = self._session.send_command(command, re_string=self._prompt)
 
             command = "RTRV-EQPT:{0}:SYSTEM:{1}:::PARAMETER=SIZE;".format(self._switch_name, self._incr_ctag())
-            device_data["RTRV-EQPT-SIZE"] = self._session.hardware_expect(command, re_string=self._prompt)
+            device_data["RTRV-EQPT-SIZE"] = self._session.send_command(command, re_string=self._prompt)
 
             size_match = re.search(r"SYSTEM:SIZE=(?P<src>\d+)x(?P<dst>\d+)", device_data["RTRV-EQPT-SIZE"])
 
@@ -68,13 +68,13 @@ class PolatisDriverHandler(DriverHandlerBase):
 
             command = "RTRV-PORT-SHUTTER:{0}:{1}&&{2}:{3}:;".format(self._switch_name, 1, switch_size,
                                                                     self._incr_ctag())
-            device_data["RTRV-PORT-SHUTTER"] = self._session.hardware_expect(command, re_string=self._prompt)
+            device_data["RTRV-PORT-SHUTTER"] = self._session.send_command(command, re_string=self._prompt)
 
             command = "RTRV-PATCH:{0}::{1}:;".format(self._switch_name, self._incr_ctag())
-            device_data["RTRV-PATCH"] = self._session.hardware_expect(command, re_string=self._prompt)
+            device_data["RTRV-PATCH"] = self._session.send_command(command, re_string=self._prompt)
 
             command = "RTRV-INV:{0}:OCS:{1}:;".format(self._switch_name, self._incr_ctag())
-            device_data["RTRV-INV-SN"] = self._session.hardware_expect(command, re_string=self._prompt)
+            device_data["RTRV-INV-SN"] = self._session.send_command(command, re_string=self._prompt)
         else:
             raise Exception("PolatisDriverHandler", "From service mode type (current mode: '" +
                             self._service_mode + "'!")
@@ -180,7 +180,7 @@ class PolatisDriverHandler(DriverHandlerBase):
             command = "ENT-PATCH:{0}:{1},{2}:{3}:;".format(self._switch_name, min_port, max_port,
                                                        self._incr_ctag())
 
-            command_result = self._session.hardware_expect(command, re_string=self._prompt)
+            command_result = self._session.send_command(command, re_string=self._prompt)
             command_logger.info(command_result)
 
     def map_clear_to(self, src_port, dst_port, command_logger=None):
@@ -194,7 +194,7 @@ class PolatisDriverHandler(DriverHandlerBase):
             command = "DLT-PATCH:{0}:{1}:{2}:;".format(self._switch_name, min_port, max_port,
                                                        self._incr_ctag())
 
-            self._session.hardware_expect(command, re_string=self._prompt)
+            self._session.send_command(command, re_string=self._prompt)
 
     def map_clear(self, src_port, dst_port, command_logger=None):
         if self._service_mode.lower() == "scpi":
@@ -207,4 +207,4 @@ class PolatisDriverHandler(DriverHandlerBase):
             command = "DLT-PATCH:{0}:{1}:{2}:;".format(self._switch_name, min_port, max_port,
                                                        self._incr_ctag())
 
-            self._session.hardware_expect(command, re_string=self._prompt)
+            self._session.send_command(command, re_string=self._prompt)

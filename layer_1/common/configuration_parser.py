@@ -13,11 +13,6 @@ class ConfigurationParser:
     _ROOT_FOLDER = None
 
     @staticmethod
-    def _read_json_data(file_path):
-        json_data = open(get_file_path(file_path)).read()
-        return json.loads(json_data)
-
-    @staticmethod
     def set_root_folder(folder_path):
         ConfigurationParser._ROOT_FOLDER = folder_path
 
@@ -25,12 +20,14 @@ class ConfigurationParser:
     def init():
         if ConfigurationParser._CONFIG_JSON is None:
             configure_path = ConfigurationParser._CONFIG_PATH
-            ConfigurationParser._CONFIG_JSON = ConfigurationParser._read_json_data(configure_path)
+            json_data = open(get_file_path(configure_path)).read()
+            ConfigurationParser._CONFIG_JSON = json.loads(json_data)
 
         if ConfigurationParser._RUNTIME_CONFIG_JSON is None:
             configure_path = ConfigurationParser._ROOT_FOLDER + \
                              ConfigurationParser._CONFIG_JSON["common_variable"]["runtime_configuration"]
-            ConfigurationParser._RUNTIME_CONFIG_JSON = ConfigurationParser._read_json_data(configure_path)
+            json_data = open(configure_path).read()
+            ConfigurationParser._RUNTIME_CONFIG_JSON = json.loads(json_data)
 
     @staticmethod
     def get(*args):

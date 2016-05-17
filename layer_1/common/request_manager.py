@@ -2,6 +2,7 @@ __author__ = 'g8y3e'
 
 import socket
 import re
+from datetime import datetime
 
 from xml_wrapper import XMLWrapper
 from helper.system_helper import get_file_path
@@ -96,6 +97,10 @@ class RequestManager:
 
                             XMLWrapper.set_node_attr(command_response_node, 'CommandName', attr_value=command_name)
                             XMLWrapper.set_node_attr(command_response_node, 'CommandId', attr_value=command_id)
+
+                            timestamp_node = XMLWrapper.get_child_node(command_response_node, 'Timestamp')
+                            #dd.mm.yyyy hh:mm:ss  , time.gmtime()
+                            XMLWrapper.set_node_text(timestamp_node, datetime.now().strftime("%d.%m.%Y %H:%M:%S"))
 
                             return_state = True
                             responce_info = None

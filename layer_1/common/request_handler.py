@@ -207,4 +207,3 @@ class RequestHandler:
         dst_port_str = XMLWrapper.get_node_text(map_ports[1])
 
         return self._driver_handler.map_clear(src_port_str.split('/'), dst_port_str.split('/'), command_logger)
-

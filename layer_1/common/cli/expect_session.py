@@ -70,7 +70,7 @@ class ExpectSession(Session):
         reconnect_count = 0
         while reconnect_count < self._reconnect_count:
             try:
-                output_str = self.hardware_expect(timeout, data_str, re_string, expect_map, error_map, timeout,
+                output_str = self.hardware_expect(data_str, re_string, expect_map, error_map, timeout,
                                                   retries_count)
 
                 return output_str

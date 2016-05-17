@@ -7,6 +7,7 @@ from layer_1.common.configuration_parser import ConfigurationParser
 from layer_1.common.server_connection import ServerConnection
 from layer_1.common.request_manager import RequestManager
 from layer_1.common.request_handler import RequestHandler
+from layer_1.common.helper.system_helper import get_file_folder
 
 import layer_1.common.request_handler as request_handler
 
@@ -18,16 +19,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         port = int(sys.argv[1])
 
-    exe_folder_str = sys.argv[0]
-    index = exe_folder_str.rfind('\\')
-    if index != -1:
-        exe_folder_str = exe_folder_str[:index + 1]
-    else:
-        index = exe_folder_str.rfind('/')
-        if index != -1:
-            exe_folder_str = exe_folder_str[:index + 1]
-
-    print exe_folder_str
+    exe_folder_str = get_file_folder(sys.argv[0])
     ConfigurationParser.set_root_folder(exe_folder_str)
 
     request_handler = RequestHandler()

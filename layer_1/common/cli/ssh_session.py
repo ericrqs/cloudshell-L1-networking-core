@@ -7,8 +7,11 @@ from layer_1.common.cli.expect_session import ExpectSession
 class SSHSession(ExpectSession):
     _DEFAULT_BUFFER = 512
 
+    def _init_handler(self):
+        return paramiko.SSHClient()
+
     def __init__(self, *args, **kwargs):
-        ExpectSession.__init__(self, paramiko.SSHClient(), *args, **kwargs)
+        ExpectSession.__init__(self, self._init_handler(), *args, **kwargs)
         self._handler.load_system_host_keys()
         self._handler.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
@@ -42,6 +45,12 @@ class SSHSession(ExpectSession):
         self._logger.info(output)
 
         return output
+
+    def reconnect(self, re_string=''):
+        self.disconnect()
+
+        self._handler = self._init_handler()
+        return self.connect(self._host, self._username, self._password, self._port, re_string)
 
     def disconnect(self):
         """
