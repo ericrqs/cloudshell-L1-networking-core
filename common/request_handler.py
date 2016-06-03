@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import importlib
+import os
 
 from common.configuration_parser import ConfigurationParser
 from common.xml_wrapper import XMLWrapper
@@ -17,7 +18,7 @@ class RequestHandler:
         self._device_user = None
         self._device_password = None
 
-        self._state_id_template = open(get_file_path('common/response_template/'
+        self._state_id_template = open(get_file_path(ConfigurationParser.COMMON_FOLDER, 'response_template/'
                                                      'state_id_template.xml')).read()
         self.init_driver_handler()
 

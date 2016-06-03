@@ -5,8 +5,8 @@ import os
 import sys
 
 
-def get_file_path(relative_path):
-    return os.path.join(getattr(sys, "_MEIPASS", os.path.abspath(".")), relative_path)
+def get_file_path(root_path, relative_path):
+    return os.path.join(getattr(sys, "_MEIPASS", os.path.abspath(root_path)), relative_path)
 
 
 def get_file_folder(file_path):
