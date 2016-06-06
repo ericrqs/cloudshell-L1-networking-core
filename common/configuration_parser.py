@@ -16,6 +16,7 @@ class ConfigurationParser:
     @staticmethod
     def set_root_folder(folder_path):
         ConfigurationParser._ROOT_FOLDER = folder_path
+        ConfigurationParser.COMMON_FOLDER = os.path.abspath(os.path.dirname(__file__))
 
     @staticmethod
     def init():
@@ -29,8 +30,8 @@ class ConfigurationParser:
             json_data = open(get_file_path(ConfigurationParser._ROOT_FOLDER, configure_path)).read()
             ConfigurationParser._RUNTIME_CONFIG_JSON = json.loads(json_data)
 
-        if not ConfigurationParser.COMMON_FOLDER:
-            ConfigurationParser.COMMON_FOLDER = os.path.abspath(os.path.dirname(__file__))
+        # if not ConfigurationParser.COMMON_FOLDER:
+        #     ConfigurationParser.COMMON_FOLDER = os.path.abspath(os.path.dirname(__file__))
 
     @staticmethod
     def get(*args):
