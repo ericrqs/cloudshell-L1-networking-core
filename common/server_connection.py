@@ -12,11 +12,11 @@ class ServerConnection:
     def __init__(self, host, port, request_manager, exe_folder_str):
         driver_name = ConfigurationParser.get("common_variable", "driver_name")
 
-        self._xml_logger = get_qs_logger(log_group=driver_name,
-                                         log_file_prefix=driver_name + '_XML')
+        self._xml_logger = get_qs_logger(log_group=driver_name + '_xml',
+                                         log_file_prefix=driver_name + '_xml', log_category='XML')
 
-        self._command_logger = get_qs_logger(log_group=driver_name,
-                                             log_file_prefix=driver_name + '_COMMANDS')
+        self._command_logger = get_qs_logger(log_group=driver_name + '_commands',
+                                             log_file_prefix=driver_name + '_commands', log_category='COMMANDS')
 
         # self._command_logger = get_qs_logger(log_group=driver_name, log_file_prefix=driver_name + '_COMMANDS',
         #                                      format='%(asctime)s [%(levelname)s]: %(name)s %(module)s - '

@@ -27,7 +27,7 @@ class ResourceInfo:
         elif isinstance(value, int):
             return "Numeric"
 
-        raise Exception("ResourceInfo", "Can't get attribute type from resource '" + self._address + "'!")
+        raise Exception("ResourceInfo", "Can't get attribute type from resource '" + str(self._address) + "'!")
 
     def set_model_name(self, name):
         self._model_name = name
