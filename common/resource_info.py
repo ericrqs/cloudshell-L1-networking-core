@@ -61,16 +61,19 @@ class ResourceInfo:
 
     def convert_to_xml(self, resource_template=None, attribute_template=None, incoming_map_template=None, relative_address=''):
         if resource_template is None:
-            resource_template = open(get_file_path(ConfigurationParser.COMMON_FOLDER,
-                                                   'common/response_template/resource_template.xml')).read()
+            resource_template = open(get_file_path(ConfigurationParser.L1_CORE_FOLDER,
+                                                   'common/response_template/'
+                                                   'resource_template.xml')).read()
 
         if attribute_template is None:
-            attribute_template = open(get_file_path(ConfigurationParser.COMMON_FOLDER,
-                                                    'common/response_template/resource_attribute_template.xml')).read()
+            attribute_template = open(get_file_path(ConfigurationParser.L1_CORE_FOLDER,
+                                                    'common/response_template/'
+                                                    'resource_attribute_template.xml')).read()
 
         if incoming_map_template is None:
-            incoming_map_template = open(get_file_path(ConfigurationParser.COMMON_FOLDER,
-                                                       'common/response_template/resource_incoming_map_template.xml')).read()
+            incoming_map_template = open(get_file_path(ConfigurationParser.L1_CORE_FOLDER,
+                                                       'common/response_template/'
+                                                       'resource_incoming_map_template.xml')).read()
 
         resource_node = XMLWrapper.parse_xml(resource_template)
 

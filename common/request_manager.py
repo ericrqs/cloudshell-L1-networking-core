@@ -22,13 +22,16 @@ class RequestManager:
         self._re_command_end = r'</Commands>'
         self._end_command = '\r\n'
 
-        self._parsing_error_xml = XMLWrapper.parse_xml_from_file(get_file_path(ConfigurationParser.COMMON_FOLDER,
-                                                                               'response_template/parsing_error.xml'))
+        self._parsing_error_xml = XMLWrapper.parse_xml_from_file(get_file_path(ConfigurationParser.L1_CORE_FOLDER,
+                                                                               'common/response_template/'
+                                                                               'parsing_error.xml'))
 
-        self._command_response_data = open(get_file_path(ConfigurationParser.COMMON_FOLDER, 'response_template/'
+        self._command_response_data = open(get_file_path(ConfigurationParser.L1_CORE_FOLDER,
+                                                         'common/response_template/'
                                                          'command_response_template.xml')).read()
 
-        self._responses_data = open(get_file_path(ConfigurationParser.COMMON_FOLDER, 'response_template/'
+        self._responses_data = open(get_file_path(ConfigurationParser.L1_CORE_FOLDER,
+                                                  'common/response_template/'
                                                   'responses_template.xml')).read()
 
     def set_request_handler(self, request_handler):
