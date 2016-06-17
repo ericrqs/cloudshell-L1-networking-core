@@ -88,6 +88,9 @@ class XMLWrapper:
     def set_indent(node, level=0):
         tab_separator = " " * 4
 
+        if not node:
+            return None
+
         tab_str = "\n" + level * tab_separator
         if len(node):
             if not node.text or not node.text.strip():
@@ -103,14 +106,15 @@ class XMLWrapper:
             if level and (not node.tail or not node.tail.strip()):
                 node.tail = tab_str
 
+        return 1
+
     @staticmethod
     def get_string_from_xml(node):
         etree.register_namespace("", "http://schemas.qualisystems.com/ResourceManagement/DriverCommandResult.xsd")
 
-        XMLWrapper.set_indent(node)
-
-        str_data = etree.tostring(node, 'utf-8')
-        return str_data.replace('\n', '\r\n')
+        if XMLWrapper.set_indent(node):
+            str_data = etree.tostring(node, 'utf-8')
+            return str_data.replace('\n', '\r\n')
 
     @staticmethod
     def get_node_child_count(node):

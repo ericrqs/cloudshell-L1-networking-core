@@ -4,6 +4,8 @@
 import socket
 import re
 from datetime import datetime
+import traceback
+import time
 
 from xml_wrapper import XMLWrapper
 from helper.system_helper import get_file_path
@@ -11,7 +13,7 @@ from configuration_parser import ConfigurationParser
 
 
 class RequestManager:
-    def __init__(self, buffer_size=1024):
+    def __init__(self, buffer_size=2048):
         self._buffer_size = buffer_size
         self._connection_socket = None
         self._request_handler = None
@@ -61,10 +63,17 @@ class RequestManager:
         current_output = ''
         while True:
             try:
-                current_output += self._connection_socket.recv(self._buffer_size).strip()
+                input_buffer = self._connection_socket.recv(self._buffer_size)
+                current_output += input_buffer.strip()
+                if not current_output:
+                    time.sleep(0.2)
+                    continue
+                #command_logger.debug('GOT: {}'.format(current_output))
             except socket.timeout:
                 continue
             except Exception as error_object:
+                tb = traceback.format_exc()
+                command_logger.critical(tb)
                 raise error_object
 
             match_result = re.search(self._re_command_end, current_output)
@@ -78,6 +87,8 @@ class RequestManager:
                     request_node = XMLWrapper.parse_xml(current_output)
                     current_output = ''
                 except Exception as error_object:
+                    tb = traceback.format_exc()
+                    command_logger.critical(tb)
                     responses_node = self._set_response_error(responses_node, '0',
                                                               'Failed to parse the xml')
 
@@ -97,7 +108,11 @@ class RequestManager:
 
                     if command_name is not None:
                         command_name_lower = command_name.lower()
+                        command_logger.info('\n\n----------------------------\nGot command {0}\n>>>\n'.format(command_name ))
+                        if not command_name_lower in self._commands_dict:
+                            command_logger.info('{} Not implemented, skip'.format(command_name))
                         if command_name_lower in self._commands_dict:
+                            command_logger.info('Start command {0}'.format(command_name_lower ))
                             callback_tuple = self._commands_dict[command_name_lower]
 
                             command_response_node = XMLWrapper.parse_xml(self._command_response_data)
@@ -115,6 +130,8 @@ class RequestManager:
                                 responce_info = callback_tuple[0](callback_tuple[1], command_node, xs_prefix,
                                                                   command_logger)
                             except Exception as error_object:
+                                tb = traceback.format_exc()
+                                command_logger.critical(tb)
                                 return_state = False
                                 command_logger.error(str(error_object))
                                 self._set_response_error(responses_node, '0', str(error_object))

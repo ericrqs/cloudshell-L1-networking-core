@@ -50,6 +50,8 @@ class RequestHandler:
         :return:
         """
         command_logger.info("Begin")
+        command_logger.info(XMLWrapper.get_string_from_xml(command_node))
+
         parameters_node = XMLWrapper.get_child_node(command_node, 'Parameters', xs_prefix)
         address_node = XMLWrapper.get_child_node(parameters_node, 'Address', xs_prefix)
         user_node = XMLWrapper.get_child_node(parameters_node, 'User', xs_prefix)
@@ -68,6 +70,7 @@ class RequestHandler:
         self._device_user = user_str
         self._device_password = password_str
 
+        command_logger.info(XMLWrapper.get_string_from_xml(response_node))
         command_logger.info("end")
 
         return response_node
@@ -85,12 +88,16 @@ class RequestHandler:
         :param command_node:
         :return:
         """
+        command_logger.info(XMLWrapper.get_string_from_xml(command_node))
         parameters_node = XMLWrapper.get_child_node(command_node, 'Parameters', xs_prefix)
 
         address_node = XMLWrapper.get_child_node(parameters_node, 'Address', xs_prefix)
         address_str = XMLWrapper.get_node_text(address_node)
 
-        return self._driver_handler.get_resource_description(address_str, command_logger)
+        xml_description = self._driver_handler.get_resource_description(address_str, command_logger)
+        command_logger.info(XMLWrapper.get_string_from_xml(xml_description))
+
+        return xml_description
 
     def set_state_id(self, command_node, xs_prefix='', command_logger=None):
         """
@@ -106,6 +113,7 @@ class RequestHandler:
         :param xs_prefix:
         :return:
         """
+        command_logger.info(XMLWrapper.get_string_from_xml(command_node))
         parameters_node = XMLWrapper.get_child_node(command_node, 'Parameters', xs_prefix)
         state_node = XMLWrapper.get_child_node(parameters_node, 'StateId', xs_prefix)
 
@@ -125,6 +133,7 @@ class RequestHandler:
         :param xs_prefix:
         :return:
         """
+        command_logger.info(XMLWrapper.get_string_from_xml(command_node))
         state_id_node = XMLWrapper.parse_xml(self._state_id_template)
         XMLWrapper.set_node_text(state_id_node, '-1')
 
@@ -146,7 +155,7 @@ class RequestHandler:
         :param xs_prefix:
         :return:
         """
-
+        command_logger.info(XMLWrapper.get_string_from_xml(command_node))
         parameters_node = XMLWrapper.get_child_node(command_node, 'Parameters', xs_prefix)
 
         src_port_node = XMLWrapper.get_child_node(parameters_node, 'MapPort_A', xs_prefix)
@@ -155,7 +164,9 @@ class RequestHandler:
         src_port_str = XMLWrapper.get_node_text(src_port_node)
         dst_port_str = XMLWrapper.get_node_text(dst_port_node)
 
-        return self._driver_handler.map_bidi(src_port_str.split('/'), dst_port_str.split('/'), command_logger)
+        response = self._driver_handler.map_bidi(src_port_str.split('/'), dst_port_str.split('/'), command_logger)
+        command_logger.info(XMLWrapper.get_string_from_xml(response))
+        return response
 
     def map_clear_to(self, command_node, xs_prefix='', command_logger=None):
         """
@@ -173,6 +184,7 @@ class RequestHandler:
        :return:
        """
 
+        command_logger.info(XMLWrapper.get_string_from_xml(command_node))
         parameters_node = XMLWrapper.get_child_node(command_node, 'Parameters', xs_prefix)
 
         src_port_node = XMLWrapper.get_child_node(parameters_node, 'SrcPort', xs_prefix)
@@ -181,7 +193,9 @@ class RequestHandler:
         src_port_str = XMLWrapper.get_node_text(src_port_node)
         dst_port_str = XMLWrapper.get_node_text(dst_port_node)
 
-        return self._driver_handler.map_clear_to(src_port_str.split('/'), dst_port_str.split('/'), command_logger)
+        response = self._driver_handler.map_clear_to(src_port_str.split('/'), dst_port_str.split('/'), command_logger)
+        command_logger.info(XMLWrapper.get_string_from_xml(response))
+        return response
 
     def map_clear(self, command_node, xs_prefix='', command_logger=None):
         """
@@ -199,6 +213,7 @@ class RequestHandler:
        :return:
        """
 
+        command_logger.info(XMLWrapper.get_string_from_xml(command_node))
         parameters_node = XMLWrapper.get_child_node(command_node, 'Parameters', xs_prefix)
 
         map_ports = XMLWrapper.get_all_child_node(parameters_node, 'MapPort', xs_prefix)
@@ -206,4 +221,56 @@ class RequestHandler:
         src_port_str = XMLWrapper.get_node_text(map_ports[0])
         dst_port_str = XMLWrapper.get_node_text(map_ports[1])
 
-        return self._driver_handler.map_clear(src_port_str.split('/'), dst_port_str.split('/'), command_logger)
+        response = self._driver_handler.map_clear(src_port_str.split('/'), dst_port_str.split('/'), command_logger)
+        command_logger.info(XMLWrapper.get_string_from_xml(response))
+        return response
+
+    def map_uni(self, command_node, xs_prefix='', command_logger=None):
+        """
+        <Commands xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.qualisystems.com/ResourceManagement/DriverCommands.xsd">
+            <Command CommandName="MapUni" CommandId="09cc9080-386b-4143-aaa0-a7211370304b">
+                <Parameters xsi:type="MapUniCommandParameters">
+                    <SrcPort>192.168.28.223/2</SrcPort>
+                    <DstPort>192.168.28.223/49</DstPort>
+                </Parameters>
+            </Command>
+        </Commands>
+
+       :param command_node:
+       :param xs_prefix:
+       :return:
+       """
+        command_logger.info(XMLWrapper.get_string_from_xml(command_node))
+
+        parameters_node = XMLWrapper.get_child_node(command_node, 'Parameters', xs_prefix)
+
+        src_port_node = XMLWrapper.get_child_node(parameters_node, 'SrcPort', xs_prefix)
+        dst_port_node = XMLWrapper.get_child_node(parameters_node, 'DstPort', xs_prefix)
+
+        src_port_str = XMLWrapper.get_node_text(src_port_node)
+        dst_port_str = XMLWrapper.get_node_text(dst_port_node)
+
+        response = self._driver_handler.map_uni(src_port_str.split('/'), dst_port_str.split('/'), command_logger)
+        command_logger.info(XMLWrapper.get_string_from_xml(response))
+        return response
+
+    def set_speed_manual(self, command_node, xs_prefix='', command_logger=None):
+        """
+        <Commands xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.qualisystems.com/ResourceManagement/DriverCommands.xsd">
+            <Command CommandName="SetSpeedManual" CommandId="d361b400-75bc-4029-a697-7cf67e8e9d0c">
+                <Parameters xsi:type="SetSpeedManualCommandParameters">
+                  <SrcPort>192.168.2.41/12-12</SrcPort>
+                  <DstPort>192.168.2.41/11-11</DstPort>
+                  <Speed />
+                  <Duplex />
+                </Parameters>
+          </Command>
+        </Commands>
+
+       :param command_node:
+       :param xs_prefix:
+       :return:
+       """
+        command_logger.info(XMLWrapper.get_string_from_xml(command_node))
+        response = self._driver_handler.set_speed_manual(command_logger)
+        return response
