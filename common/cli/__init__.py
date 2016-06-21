@@ -1,5 +1,3 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
+__author__ = 'g8y3e'
 from pkgutil import extend_path
 path = extend_path(__path__, __name__)
